@@ -1,0 +1,3 @@
+[submodule "placesindex"]
+	path = placesindex
+	url = git@css-gitlab:mobile/placesindex.git
