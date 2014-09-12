@@ -1,13 +1,37 @@
+var _ = require('underscore');
 var http = require('http');
 var url = require('url');
 var completer = require('./placesindex/completer.js');
 var fs = require('fs');
-var places = JSON.parse(fs.readFileSync('./places.txt', 'utf8'));
 
+// Config options
+var placesFile = './places.txt';
 var serverAddr = "127.0.0.1";
 var serverPort = 8080;
 
+// Load places db
+var places;
+try {
+    places = JSON.parse(fs.readFileSync(placesFile, 'utf8'));
+} catch(err) {
+    console.error(err);
+    process.exit(1);
+}
+
+// Strips everything but title and ID from search results
+function getIds(results) {
+    var output = [];
+    
+    results.forEach(function(obj) {
+	output.push({title: obj['title'], id: obj['id']});
+    });
+
+    return output;
+}
+
+// HTTP server
 console.log('Starting placequery server');
+console.log('There are ' + _.size(places['all']) + ' places in the database.');
 
 var server = http.createServer(function(req, res) {
     console.log('Processing query');
@@ -22,7 +46,9 @@ var server = http.createServer(function(req, res) {
     // Searching by text
     searchQuery = parsedUrl['query']['search'];
     if(searchQuery != undefined) {
-	res.write(JSON.stringify(completer.complete(places, searchQuery)));
+	var results = completer.complete(places, searchQuery);
+	var output = getIds(results);
+	res.write(JSON.stringify(output));
 	res.end();
 	return;
     } 
@@ -31,7 +57,17 @@ var server = http.createServer(function(req, res) {
     lonQuery = parsedUrl['query']['longitude'];
     latQuery = parsedUrl['query']['latitude'];
     if(lonQuery != undefined && latQuery != undefined) {
-	res.write(JSON.stringify(completer.nearby(places, latQuery, lonQuery)));
+	var results = completer.nearby(places, latQuery, lonQuery);
+	var output = getIds(results);
+	res.write(JSON.stringify(output));
+	res.end();
+	return;
+    }
+
+    // Get specific place by ID
+    idQuery = parsedUrl['query']['id'];
+    if(idQuery != undefined) {
+	res.write(JSON.stringify(places['all'][idQuery]));
 	res.end();
 	return;
     }
