@@ -8,6 +8,7 @@ var fs = require('fs');
 var placesFile = './places.txt';
 var serverAddr = "127.0.0.1";
 var serverPort = 8080;
+var numNearbyResults = 10;
 
 // Load places db
 var places;
@@ -57,7 +58,7 @@ var server = http.createServer(function(req, res) {
     lonQuery = parsedUrl['query']['longitude'];
     latQuery = parsedUrl['query']['latitude'];
     if(lonQuery != undefined && latQuery != undefined) {
-	var results = completer.nearby(places, latQuery, lonQuery);
+	var results = completer.nearby(places, latQuery, lonQuery, numNearbyResults);
 	var output = getIds(results);
 	res.write(JSON.stringify(output));
 	res.end();
