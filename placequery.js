@@ -37,8 +37,6 @@ console.log('There are ' + _.size(places['all']) + ' places in the database.');
 var server = http.createServer(function(req, res) {
     console.log('Processing query');
 
-    res.writeHead(200, {'Content-Type': 'application/json'});
-    
     var parsedUrl = url.parse(req.url, true);
     for(get in parsedUrl['query']) {
 	console.log(get + ": " + parsedUrl['query'][get]);
@@ -49,6 +47,7 @@ var server = http.createServer(function(req, res) {
     if(searchQuery != undefined) {
 	var results = completer.complete(places, searchQuery);
 	var output = getIds(results);
+	res.writeHead(200, {'Content-Type': 'application/json'});
 	res.write(JSON.stringify(output));
 	res.end();
 	return;
@@ -60,6 +59,7 @@ var server = http.createServer(function(req, res) {
     if(lonQuery != undefined && latQuery != undefined) {
 	var results = completer.nearby(places, latQuery, lonQuery, numNearbyResults);
 	var output = getIds(results);
+	res.writeHead(200, {'Content-Type': 'application/json'});
 	res.write(JSON.stringify(output));
 	res.end();
 	return;
@@ -68,12 +68,14 @@ var server = http.createServer(function(req, res) {
     // Get specific place by ID
     idQuery = parsedUrl['query']['id'];
     if(idQuery != undefined) {
+	res.writeHead(200, {'Content-Type': 'application/json'});
 	res.write(JSON.stringify(places['all'][idQuery]));
 	res.end();
 	return;
     }
 
     // No valid query
+    res.writeHead(400, {'Content-Type': 'application/json'});
     res.write('{"error": "No query"}');
     res.end();
 });
