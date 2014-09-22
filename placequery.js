@@ -37,7 +37,7 @@ function jsendOutput(status, dataFieldName, data) {
 	return output;
 }
 
-// Write successful response
+// Send response to client
 function respond(res, code, data) {
 	res.writeHead(code, {'Content-Type': 'application/json'});
 	res.write(JSON.stringify(data));
