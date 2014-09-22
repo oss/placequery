@@ -1,20 +1,14 @@
 var _ = require('underscore');
+var yaml = require('js-yaml');
 var http = require('http');
 var url = require('url');
-var completer = require('./placesindex/completer.js');
 var fs = require('fs');
-
-// Config options
-var placesFile = './places.txt';
-var serverAddr = "127.0.0.1";
-var serverPort = 8080;
-var numNearbyResults = 10;
-var logQueries = true;
+var completer = require('./placesindex/completer.js');
 
 // Load places db
-var places;
 try {
-    places = JSON.parse(fs.readFileSync(placesFile, 'utf8'));
+    var config = yaml.safeLoad(fs.readFileSync('./config.yaml', 'utf8'));
+    var places = JSON.parse(fs.readFileSync(config.paths.placesdb, 'utf8'));
 } catch (err) {
     console.error(err);
     process.exit(1);
@@ -58,7 +52,7 @@ var server = http.createServer(function(req, res) {
     var parsedUrl = url.parse(req.url, true);
 
     // Log query
-    if(logQueries) {
+    if(config.log.verbose) {
 	console.log('Processing query');
 	for(get in parsedUrl['query']) {
 	    console.log(get + ": " + parsedUrl['query'][get]);
@@ -79,7 +73,7 @@ var server = http.createServer(function(req, res) {
     latQuery = parsedUrl['query']['latitude'];
     if(lonQuery != undefined && latQuery != undefined) {
 	if(isNumber(lonQuery) && isNumber(latQuery)) {
-	    var results = getIds(completer.nearby(places, latQuery, lonQuery, numNearbyResults));
+	    var results = getIds(completer.nearby(places, latQuery, lonQuery, config.limits.nearby));
 	    var output = jsendOutput("success", "places", results);
 	    respond(res, 200, output);
 	} else {
@@ -108,5 +102,5 @@ var server = http.createServer(function(req, res) {
     respond(res, 400, output);
 });
 
-server.listen(serverPort, serverAddr);
-console.log('Server listening on port ' + serverPort);
+server.listen(config.server.port, config.server.address);
+console.log('Server listening on port ' + config.server.port);

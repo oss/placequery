@@ -1,0 +1,13 @@
+# placequery server config
+server:
+  address: '127.0.0.1'
+  port: '8080'
+
+paths:
+  placesdb: './places.txt'
+
+log:
+  verbose: true
+
+limits:
+  nearby: 10
