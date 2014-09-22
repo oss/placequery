@@ -30,6 +30,20 @@ function getIds(results) {
     return output;
 }
 
+// Create JSend style output object
+function jsendOutput(status, dataFieldName, data) {
+	var output = {status: status, data:{}};
+	output['data'][dataFieldName] = data;
+	return output;
+}
+
+// Write successful response
+function respond(res, code, data) {
+	res.writeHead(code, {'Content-Type': 'application/json'});
+	res.write(JSON.stringify(data));
+	res.end();
+}
+
 // HTTP server
 console.log('Starting placequery server');
 console.log('There are ' + _.size(places['all']) + ' places in the database.');
@@ -45,11 +59,9 @@ var server = http.createServer(function(req, res) {
     // Searching by text
     searchQuery = parsedUrl['query']['search'];
     if(searchQuery != undefined) {
-	var results = completer.complete(places, searchQuery);
-	var output = getIds(results);
-	res.writeHead(200, {'Content-Type': 'application/json'});
-	res.write(JSON.stringify(output));
-	res.end();
+	var results = getIds(completer.complete(places, searchQuery));
+	var output = jsendOutput("success", "places", results);
+	respond(res, 200, output);
 	return;
     } 
 
@@ -57,27 +69,29 @@ var server = http.createServer(function(req, res) {
     lonQuery = parsedUrl['query']['longitude'];
     latQuery = parsedUrl['query']['latitude'];
     if(lonQuery != undefined && latQuery != undefined) {
-	var results = completer.nearby(places, latQuery, lonQuery, numNearbyResults);
-	var output = getIds(results);
-	res.writeHead(200, {'Content-Type': 'application/json'});
-	res.write(JSON.stringify(output));
-	res.end();
+	var results = getIds(completer.nearby(places, latQuery, lonQuery, numNearbyResults));
+	var output = jsendOutput("success", "places", results);
+	respond(res, 200, output);
 	return;
     }
 
     // Get specific place by ID
     idQuery = parsedUrl['query']['id'];
     if(idQuery != undefined) {
-	res.writeHead(200, {'Content-Type': 'application/json'});
-	res.write(JSON.stringify(places['all'][idQuery]));
-	res.end();
+	var place = places['all'][idQuery];
+	if(place != undefined) {
+		var output = jsendOutput("success", "place", places['all'][idQuery]);
+		respond(res, 200, output);
+	} else {
+		var output = jsendOutput("fail", "message", "Invalid ID");
+		respond(res, 404, output);
+	}
 	return;
     }
 
     // No valid query
-    res.writeHead(400, {'Content-Type': 'application/json'});
-    res.write('{"error": "No query"}');
-    res.end();
+	var output = jsendOutput("fail", "message", "No valid query supplied");
+	respond(res, 400, output);
 });
 
 server.listen(serverPort, serverAddr);
