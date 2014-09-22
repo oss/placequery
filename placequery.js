@@ -9,12 +9,13 @@ var placesFile = './places.txt';
 var serverAddr = "127.0.0.1";
 var serverPort = 8080;
 var numNearbyResults = 10;
+var logQueries = true;
 
 // Load places db
 var places;
 try {
     places = JSON.parse(fs.readFileSync(placesFile, 'utf8'));
-} catch(err) {
+} catch (err) {
     console.error(err);
     process.exit(1);
 }
@@ -32,16 +33,21 @@ function getIds(results) {
 
 // Create JSend style output object
 function jsendOutput(status, dataFieldName, data) {
-	var output = {status: status, data:{}};
-	output['data'][dataFieldName] = data;
-	return output;
+    var output = {status: status, data:{}};
+    output['data'][dataFieldName] = data;
+    return output;
 }
 
 // Send response to client
 function respond(res, code, data) {
-	res.writeHead(code, {'Content-Type': 'application/json'});
-	res.write(JSON.stringify(data));
-	res.end();
+    res.writeHead(code, {'Content-Type': 'application/json'});
+    res.write(JSON.stringify(data));
+    res.end();
+}
+
+// Validate numbers
+function isNumber(n) {
+    return !isNaN(parseFloat(n)) && isFinite(n);
 }
 
 // HTTP server
@@ -49,11 +55,14 @@ console.log('Starting placequery server');
 console.log('There are ' + _.size(places['all']) + ' places in the database.');
 
 var server = http.createServer(function(req, res) {
-    console.log('Processing query');
-
     var parsedUrl = url.parse(req.url, true);
-    for(get in parsedUrl['query']) {
-	console.log(get + ": " + parsedUrl['query'][get]);
+
+    // Log query
+    if(logQueries) {
+	console.log('Processing query');
+	for(get in parsedUrl['query']) {
+	    console.log(get + ": " + parsedUrl['query'][get]);
+	}
     }
 
     // Searching by text
@@ -69,9 +78,14 @@ var server = http.createServer(function(req, res) {
     lonQuery = parsedUrl['query']['longitude'];
     latQuery = parsedUrl['query']['latitude'];
     if(lonQuery != undefined && latQuery != undefined) {
-	var results = getIds(completer.nearby(places, latQuery, lonQuery, numNearbyResults));
-	var output = jsendOutput("success", "places", results);
-	respond(res, 200, output);
+	if(isNumber(lonQuery) && isNumber(latQuery)) {
+	    var results = getIds(completer.nearby(places, latQuery, lonQuery, numNearbyResults));
+	    var output = jsendOutput("success", "places", results);
+	    respond(res, 200, output);
+	} else {
+	    var output = jsendOutput("fail", "message", "Longitude and latitude arguments must be numbers");
+	    respond(res, 400, output);
+	}
 	return;
     }
 
@@ -80,18 +94,18 @@ var server = http.createServer(function(req, res) {
     if(idQuery != undefined) {
 	var place = places['all'][idQuery];
 	if(place != undefined) {
-		var output = jsendOutput("success", "place", places['all'][idQuery]);
-		respond(res, 200, output);
+	    var output = jsendOutput("success", "place", place);
+	    respond(res, 200, output);
 	} else {
-		var output = jsendOutput("fail", "message", "Invalid ID");
-		respond(res, 404, output);
+	    var output = jsendOutput("fail", "message", "Invalid ID");
+	    respond(res, 404, output);
 	}
 	return;
     }
 
     // No valid query
-	var output = jsendOutput("fail", "message", "No valid query supplied");
-	respond(res, 400, output);
+    var output = jsendOutput("fail", "message", "No valid query supplied");
+    respond(res, 400, output);
 });
 
 server.listen(serverPort, serverAddr);
