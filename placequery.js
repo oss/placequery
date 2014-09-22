@@ -5,7 +5,7 @@ var url = require('url');
 var fs = require('fs');
 var completer = require('./placesindex/completer.js');
 
-// Load places db
+// Load config & places db
 try {
     var config = yaml.safeLoad(fs.readFileSync('./config.yaml', 'utf8'));
     var places = JSON.parse(fs.readFileSync(config.paths.placesdb, 'utf8'));
@@ -55,7 +55,7 @@ var server = http.createServer(function(req, res) {
     if(config.log.verbose) {
 	console.log('Processing query');
 	for(get in parsedUrl['query']) {
-	    console.log(get + ": " + parsedUrl['query'][get]);
+	    console.log(get + ': ' + parsedUrl['query'][get]);
 	}
     }
 
@@ -63,7 +63,7 @@ var server = http.createServer(function(req, res) {
     searchQuery = parsedUrl['query']['search'];
     if(searchQuery != undefined) {
 	var results = getIds(completer.complete(places, searchQuery));
-	var output = jsendOutput("success", "places", results);
+	var output = jsendOutput('success', 'places', results);
 	respond(res, 200, output);
 	return;
     } 
@@ -74,10 +74,10 @@ var server = http.createServer(function(req, res) {
     if(lonQuery != undefined && latQuery != undefined) {
 	if(isNumber(lonQuery) && isNumber(latQuery)) {
 	    var results = getIds(completer.nearby(places, latQuery, lonQuery, config.limits.nearby));
-	    var output = jsendOutput("success", "places", results);
+	    var output = jsendOutput('success', 'places', results);
 	    respond(res, 200, output);
 	} else {
-	    var output = jsendOutput("fail", "message", "Longitude and latitude arguments must be numbers");
+	    var output = jsendOutput('fail', 'message', 'Longitude and latitude arguments must be numbers');
 	    respond(res, 400, output);
 	}
 	return;
@@ -88,17 +88,17 @@ var server = http.createServer(function(req, res) {
     if(idQuery != undefined) {
 	var place = places['all'][idQuery];
 	if(place != undefined) {
-	    var output = jsendOutput("success", "place", place);
+	    var output = jsendOutput('success', 'place', place);
 	    respond(res, 200, output);
 	} else {
-	    var output = jsendOutput("fail", "message", "Invalid ID");
+	    var output = jsendOutput('fail', 'message', 'Invalid ID');
 	    respond(res, 404, output);
 	}
 	return;
     }
 
     // No valid query
-    var output = jsendOutput("fail", "message", "No valid query supplied");
+    var output = jsendOutput('fail', 'message', 'No valid query supplied');
     respond(res, 400, output);
 });
 
