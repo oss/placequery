@@ -5,10 +5,12 @@ Simple node.js web server that acts as an interface to the [placesindex] (https:
 Accepts GET requests as queries and uses the [JSend](http://labs.omniti.com/labs/jsend) spec for responses.
 
 ## Setup
-Make a copy of `config.yaml.sample`, adjust it to suit your server configuration, and save it as `config.yaml` in the same directory as `placequery.js`.
+Make a copy of `config.yaml.sample`, adjust it to suit your server configuration, and save it as `config.yaml` in the
+same directory as `placequery.js`.
 
 ## Usage
-Queries are made with GET requests to the server's root directory, e.g. [http://localhost:8080/?search=hill](). To make nicer requests like [http://localhost/pq?search=hill](), see [Integration with web service](#integration).
+Queries are made with GET requests to the server's root directory, e.g. [http://localhost:8080/?search=hill](). To make 
+nicer requests like [http://localhost/pq?search=hill](), see [Integration with web service](#integration).
 
 ##### Search by title, building code, or ID
 [http://localhost/pq?search=old]() returns:
@@ -86,7 +88,8 @@ With IDs returned in the search results you can get the full JSON entry for a pa
 ```
 
 #### <a name="integration"></a>Integration with web service
-You can make the placequery server look like it's part of your Apache service by adding something like this to your httpd.conf:
+You can make the placequery server look like it's part of your Apache service by adding something like this to your 
+httpd.conf:
 ```
 ProxyPass /pq http://localhost:8080/
 ProxyPassReverse / http://localhost:8080/
@@ -97,5 +100,8 @@ LoadModule proxy_module modules/mod_proxy.so
 LoadModule proxy_http_module modules/mod_proxy_http.so
 ```
 Now you can make requests with [http://localhost/pq?search=hill]() instead of [http://localhost:8080/?search=hill]().
+
+This is also an easy way to provide SSL capability for placequery: add the ProxyPass directives to the configuration
+of an HTTPS-enabled (virtual) host, and traffic between the end user and your server will be encrypted.
 
 See Apache's [mod proxy](http://httpd.apache.org/docs/current/mod/mod_proxy.html#proxypass) documentation for more info.
