@@ -2,27 +2,87 @@ placequery
 ==========
 Simple node.js web server that acts as an interface to the [placesindex] (https://github.com/oss/placesindex) completer.
 
-Uses the [JSend](http://labs.omniti.com/labs/jsend) spec for responses.
+Accepts GET requests as queries and uses the [JSend](http://labs.omniti.com/labs/jsend) spec for responses.
+
+## Setup
+Make a copy of `config.yaml.sample`, adjust it to suit your server configuration, and save it as `config.yaml` in the same directory as `placequery.js`.
 
 ## Usage
-Queries are made with GET requests to the server's root directory, e.g. `http://localhost:8080/?search=hill` (see [Integration with web service](#integration) for how to make nicer requests like `http://localhost/pq?search=hill`).
+Queries are made with GET requests to the server's root directory, e.g. [http://localhost:8080/?search=hill](). To make nicer requests like [http://localhost/pq?search=hill](), see [Integration with web service](#integration).
 
-##### Search by title
-```
-Parameter: search
-Returns: JSON array called "places"
+##### Search by title, building code, or ID
+[http://localhost/pq?search=old]() returns:
+```javascript
+{
+    "status": "success",
+    "data": {
+        "places": [
+            {
+                "title": "Old Gibbons Garage",
+                "id": "8435_5455Old Gibbons Garage"
+            },
+            {
+                "title": "Old Queens",
+                "id": "3000_4595Old Queens"
+            }
+        ]
+    }
+}
 ```
 
 ##### Search by location
-```
-Parameters: longitude, latitude
-Returns: JSON array called "places"
+[http://localhost/pq?latitude=40.498760&longitude=-74.446266]() returns:
+```javascript
+{
+    "status": "success",
+    "data": {
+        "places": [
+            {
+                "title": "Old Queens",
+                "id": "3000_4595Old Queens"
+            },
+            {
+                "title": "Geology Hall",
+                "id": "3002_4597Geology Hall"
+            },
+            {
+                "title": "Van Nest Hall",
+                "id": "3001_4596Van Nest Hall"
+            },
+            ...
+        ]
+    }
+}
 ```
 
 ##### Get single place
-```
-Parameters: id
-Returns: JSON object called "place"
+With IDs returned in the search results you can get the full JSON entry for a particular building.
+
+[http://localhost/pq?id=3000_4595Old%20Queens]() returns:
+```javascript
+{
+
+    "status": "success",
+    "data": {
+        "place": {
+            "title": "Old Queens",
+            "description": "Old Queens, originally called the Queens Building...",
+            "cid": "C71741",
+            "building_id": "4595",
+            "building_number": "3000",
+            "campus_code": "10",
+            "campus_name": "College Avenue",
+            "location": {
+              ...
+            },
+            "offices": [
+              ...
+            ],
+            "id": "3000_4595Old Queens"
+        }
+    }
+
+}
 ```
 
 #### <a name="integration"></a>Integration with web service
@@ -34,4 +94,6 @@ LoadModule proxy_http_module modules/mod_proxy_http.so
 ProxyPass /pq http://localhost:8080/
 ProxyPassReverse / http://localhost:8080/
 ```
-Now you can make requests with `http://localhost/pq?search=hill` instead of `http://localhost:8080/?search=hill`
+Now you can make requests with [http://localhost/pq?search=hill]() instead of [http://localhost:8080/?search=hill]().
+
+See Apache's [mod proxy](http://httpd.apache.org/docs/current/mod/mod_proxy.html#proxypass) documentation for more info.
