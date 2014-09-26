@@ -5,7 +5,11 @@ var url = require('url');
 var fs = require('fs');
 var completer = require('./placesindex/completer.js');
 
-// Strips everything but title and ID from search results
+/**
+ * Strips everything but title and ID from search results
+ * @param {Array} results Completer results
+ * @return {Array} Completer results pared down to title and ID
+ */
 function getIds(results) {
     var output = [];
     
@@ -16,21 +20,32 @@ function getIds(results) {
     return output;
 }
 
-// Create JSend style output object
+/**
+ * Creates a JSend style output object
+ * @param {String} status success, fail, or error
+ * @param {String} dataFieldName
+ * @param {Object} data
+ * @return {Object}
+ */
 function jsendOutput(status, dataFieldName, data) {
     var output = {status: status, data:{}};
     output['data'][dataFieldName] = data;
     return output;
 }
 
-// Send response to client
+/**
+ * Write response to client
+ * @param {http.ServerResponse} res Server response object
+ * @param {number} code HTTP response code
+ * @param {Object} data
+ */
 function respond(res, code, data) {
     res.writeHead(code, {'Content-Type': 'application/json'});
     res.write(JSON.stringify(data));
     res.end();
 }
 
-// Validate numbers
+/** Validate a number parameter */
 function isNumber(n) {
     return !isNaN(parseFloat(n)) && isFinite(n);
 }
