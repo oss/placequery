@@ -1,13 +1,15 @@
 # placequery server config
 server:
-  address: '127.0.0.1'
-  port: '8080'
+  address: 127.0.0.1
+  port: 8080
 
 paths:
-  database: './places.json'
+  database: ./places.json
 
 log:
   verbose: true
 
 limits:
-  nearby: 10
+  nearby:
+    maximum: 20
+    default: 10

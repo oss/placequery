@@ -70,8 +70,16 @@ var requestListener = function(req, res) {
     latQuery = parsedUrl['query']['latitude'];
     if(lonQuery != undefined && latQuery != undefined) {
 	if(isNumber(lonQuery) && isNumber(latQuery)) {
-	    var results = getIds(completer.nearby(places, latQuery, lonQuery, config.limits.nearby));
-	    var output = jsendOutput('success', 'places', results);
+	    // Decide maximum number of kdtree results
+	    var limit = config.limits.nearby.default || 10;
+	    var qLimit = parsedUrl['query']['limit'];
+	    if(qLimit != undefined && isNumber(qLimit) && qLimit > 0) {
+		if(qLimit < config.limits.nearby.maximum) limit = qLimit;
+		else limit = config.limits.nearby.maximum;
+	    }
+
+	    var results = getIds(completer.nearby(places, latQuery, lonQuery, limit));
+	    var output = jsendOutput('success', 'places', results.reverse()); // Nearest places tend to end of array
 	    respond(res, 200, output);
 	} else {
 	    var output = jsendOutput('fail', 'message', 'Longitude and latitude arguments must be numbers');
