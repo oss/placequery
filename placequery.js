@@ -38,7 +38,7 @@ function isNumber(n) {
 // Load config & places db
 try {
     var config = yaml.safeLoad(fs.readFileSync('./config.yaml', 'utf8'));
-    var places = JSON.parse(fs.readFileSync(config.paths.placesdb, 'utf8'));
+    var places = JSON.parse(fs.readFileSync(config.paths.database, 'utf8'));
 } catch (err) {
     console.error(err);
     process.exit(1);
