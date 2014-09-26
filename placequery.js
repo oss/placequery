@@ -1,6 +1,7 @@
 var _ = require('underscore');
 var yaml = require('js-yaml');
 var http = require('http');
+var https = require('https');
 var url = require('url');
 var fs = require('fs');
 var completer = require('./placesindex/completer.js');
@@ -127,7 +128,18 @@ var requestListener = function(req, res) {
 console.log('Starting placequery server');
 console.log('There are ' + _.size(places['all']) + ' places in the database.');
 
-var server = http.createServer(requestListener);
+if(config.server.ssl.enabled) {
+    var options = {key: config.server.ssl.key, cert: config.server.ssl.cert};
+
+    try {
+	var server = https.createServer(options, requestListener);
+    } catch (err) {
+	console.error(err);
+	process.exit(1);
+    }
+} else {
+    var server = http.createServer(requestListener);
+}
 
 server.listen(config.server.port, config.server.address);
 console.log('Server listening on port ' + config.server.port);
