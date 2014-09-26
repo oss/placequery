@@ -129,9 +129,11 @@ console.log('Starting placequery server');
 console.log('There are ' + _.size(places['all']) + ' places in the database.');
 
 if(config.server.ssl.enabled) {
-    var options = {key: config.server.ssl.key, cert: config.server.ssl.cert};
-
     try {
+	var options = {
+	    key: fs.readFileSync(config.server.ssl.key),
+	    cert: fs.readFileSync(config.server.ssl.cert)
+	};
 	var server = https.createServer(options, requestListener);
     } catch (err) {
 	console.error(err);
