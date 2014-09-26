@@ -5,15 +5,6 @@ var url = require('url');
 var fs = require('fs');
 var completer = require('./placesindex/completer.js');
 
-// Load config & places db
-try {
-    var config = yaml.safeLoad(fs.readFileSync('./config.yaml', 'utf8'));
-    var places = JSON.parse(fs.readFileSync(config.paths.placesdb, 'utf8'));
-} catch (err) {
-    console.error(err);
-    process.exit(1);
-}
-
 // Strips everything but title and ID from search results
 function getIds(results) {
     var output = [];
@@ -44,11 +35,17 @@ function isNumber(n) {
     return !isNaN(parseFloat(n)) && isFinite(n);
 }
 
-// HTTP server
-console.log('Starting placequery server');
-console.log('There are ' + _.size(places['all']) + ' places in the database.');
+// Load config & places db
+try {
+    var config = yaml.safeLoad(fs.readFileSync('./config.yaml', 'utf8'));
+    var places = JSON.parse(fs.readFileSync(config.paths.placesdb, 'utf8'));
+} catch (err) {
+    console.error(err);
+    process.exit(1);
+}
 
-var server = http.createServer(function(req, res) {
+// Listener function for handling requests
+var requestListener = function(req, res) {
     var parsedUrl = url.parse(req.url, true);
 
     // Log query
@@ -100,7 +97,14 @@ var server = http.createServer(function(req, res) {
     // No valid query
     var output = jsendOutput('fail', 'message', 'No valid query supplied');
     respond(res, 400, output);
-});
+    console.log('Invalid query');
+};
+
+// Launch the HTTP server
+console.log('Starting placequery server');
+console.log('There are ' + _.size(places['all']) + ' places in the database.');
+
+var server = http.createServer(requestListener);
 
 server.listen(config.server.port, config.server.address);
 console.log('Server listening on port ' + config.server.port);
