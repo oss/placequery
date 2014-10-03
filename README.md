@@ -9,6 +9,8 @@ Make a copy of `config.yaml.sample`, adjust it to suit your server configuration
 same directory as `placequery.js`.
 
 #### SSL
+Encryption is desirable if you believe certain requests to the server will reveal a user's geographic location.
+
 To enable SSL directly, set `server.ssl.enabled` to `true` in `config.yaml` and provide paths for the `key` and `cert`
 files, where `key` contains the private key of the server in PEM format and `cert` contains the certificate key of the
 server in PEM format. If you need more details, see the [Node.js SSL documentation](http://nodejs.org/api/tls.html#tls_tls_createserver_options_secureconnectionlistener).
