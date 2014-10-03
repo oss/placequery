@@ -8,6 +8,13 @@ Accepts GET requests as queries and uses the [JSend](http://labs.omniti.com/labs
 Make a copy of `config.yaml.sample`, adjust it to suit your server configuration, and save it as `config.yaml` in the
 same directory as `placequery.js`.
 
+#### SSL
+To enable SSL directly, set `server.ssl.enabled` to `true` in `config.yaml` and provide paths for the `key` and `cert`
+files, where `key` contains the private key of the server in PEM format and `cert` contains the certificate key of the
+server in PEM format. If you need more details, see the [Node.js SSL documentation](http://nodejs.org/api/tls.html#tls_tls_createserver_options_secureconnectionlistener).
+
+Alternatively, see [Integration with web service](#integration) for a way to tunnel traffic between the end user and a host already configured for HTTPS.
+
 ## Usage
 Queries are made with GET requests to the server's root directory, e.g. [http://localhost:8080/?search=hill](). To make 
 nicer requests like [http://localhost/pq?search=hill](), see [Integration with web service](#integration).
@@ -63,7 +70,6 @@ With IDs returned in the search results you can get the full JSON entry for a pa
 [http://localhost/pq?id=3000_4595Old%20Queens]() returns:
 ```javascript
 {
-
     "status": "success",
     "data": {
         "place": {
@@ -83,16 +89,14 @@ With IDs returned in the search results you can get the full JSON entry for a pa
             "id": "3000_4595Old Queens"
         }
     }
-
 }
 ```
 
 #### <a name="integration"></a>Integration with web service
 You can make the placequery server look like it's part of your Apache service by adding something like this to your 
-httpd.conf:
+`httpd.conf` (adjust the port and domain to match the settings in `config.yaml`):
 ```
 ProxyPass /pq http://localhost:8080/
-ProxyPassReverse / http://localhost:8080/
 ```
 Make sure these lines are present and uncommented:
 ```
@@ -102,6 +106,7 @@ LoadModule proxy_http_module modules/mod_proxy_http.so
 Now you can make requests with [http://localhost/pq?search=hill]() instead of [http://localhost:8080/?search=hill]().
 
 This is also an easy way to provide SSL capability for placequery: add the ProxyPass directives to the configuration
-of an HTTPS-enabled (virtual) host, and traffic between the end user and your server will be encrypted.
+of an HTTPS-enabled (virtual) host, and traffic between the end user and your gateway server will be encrypted.
+Ensure that backend communications between the gateway and placequery server are safe.
 
 See Apache's [mod proxy](http://httpd.apache.org/docs/current/mod/mod_proxy.html#proxypass) documentation for more info.
