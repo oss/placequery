@@ -143,5 +143,22 @@ if(config.server.ssl.enabled) {
     var server = http.createServer(requestListener);
 }
 
-server.listen(config.server.port, config.server.address);
-console.log('Server listening on port ' + config.server.port);
+server.listen(config.server.port, config.server.address, 511, function() {
+    console.log('Server listening on port ' + config.server.port);
+    
+    // Start running as another user (lower privs)
+    var uid = parseInt(process.env.SUDO_UID) || config.server.uid;
+    var gid = parseInt(process.env.SUDO_GID) || config.server.gid;
+    if(uid && gid) {
+	console.log('Changing from ' + process.getuid() + ':' + process.getgid() + ' to ' + uid + ':' + gid + '...');
+	try {
+	    process.setgid(gid);
+	    process.setuid(uid);
+	} catch (err) {
+	    console.error(err);
+	    process.exit(1);
+	}
+    }
+
+    console.log('Running as ' + process.getuid() + ':' + process.getgid());
+});

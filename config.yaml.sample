@@ -6,6 +6,8 @@ server:
     enabled: false
     key: /path/to/key.pem
     cert: /path/to/cert.pem
+#  uid: 000
+#  gid: 000
 
 paths:
   database: ./places.json
