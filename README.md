@@ -8,6 +8,11 @@ Accepts GET requests as queries and uses the [JSend](http://labs.omniti.com/labs
 Make a copy of `config.yaml.sample`, adjust it to suit your server configuration, and save it as `config.yaml` in the
 same directory as `placequery.js`.
 
+#### Permissions
+You may need to start the server as root to bind to a certain port or read SSL keys on startup. If you start the
+server with `sudo`, it will automatically set its UID and GID to that of the user who ran `sudo` after reading the
+keys and binding to a port. Alternatively, you can define a UID and GID for the server to use in `config.yaml`.
+
 #### SSL
 Encryption is desirable if you believe certain requests to the server will reveal a user's geographic location.
 
