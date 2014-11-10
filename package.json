@@ -11,7 +11,7 @@
     "url": "https://github.com/jamchamb/placequery.git"
   },
   "author": "James Chambers <james.chambers@rutgers.edu> (http://github.com/jamchamb)",
-  "license": "MIT",
+  "license": "BSD 3-Clause",
   "bugs": {
     "url": "https://github.com/jamchamb/placequery/issues"
   },
